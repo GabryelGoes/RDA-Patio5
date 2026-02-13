@@ -34,7 +34,7 @@ const App: React.FC = () => {
 
       setData({ ...result, vehicles: sortedVehicles });
     } catch (error) {
-      console.error("Erro ao carregar dados:", error);
+      console.error("Failed to load data:", error);
     } finally {
       setLoading(false);
     }
@@ -59,8 +59,11 @@ const App: React.FC = () => {
 
   if (loading && !data) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center bg-black text-white">
-        <p className="animate-pulse font-black tracking-widest text-xs uppercase">Carregando Painel...</p>
+      <div className="h-screen w-screen flex items-center justify-center bg-black">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+          <p className="text-white font-black tracking-[0.2em] text-[10px] uppercase">Sincronizando Pátio...</p>
+        </div>
       </div>
     );
   }
@@ -68,17 +71,18 @@ const App: React.FC = () => {
   const startIndex = page * CARS_PER_PAGE;
   const visibleVehicles = data?.vehicles.slice(startIndex, startIndex + CARS_PER_PAGE) || [];
   const totalPages = data ? Math.ceil(data.vehicles.length / CARS_PER_PAGE) : 1;
+  const emptySlotsCount = CARS_PER_PAGE - visibleVehicles.length;
 
   return (
-    <div className="h-screen w-screen bg-black flex flex-col p-4 pb-6 overflow-hidden">
+    <div className="h-screen w-screen bg-black flex flex-col p-4 pb-6 overflow-hidden select-none">
       <header className="flex justify-between items-end mb-4 px-4 h-12">
         <div className="flex items-center gap-4">
-          <div className="flex flex-col">
-            <h1 className="text-xl font-black text-white uppercase italic leading-none">
-              REI DO ABS <span className="text-zinc-600">PÁTIO</span>
+          <div className="flex flex-col justify-end">
+            <h1 className="text-2xl font-black tracking-tighter uppercase italic leading-none">
+              <span className="text-yellow-400">REI DO ABS</span> <span className="text-zinc-600">PÁTIO</span>
             </h1>
-            <p className="text-[9px] font-bold text-zinc-500 tracking-widest uppercase mt-1">
-              {page + 1} de {totalPages} • Atualização Automática
+            <p className="text-[10px] font-bold text-zinc-500 tracking-[0.2em] uppercase leading-none mt-1">
+              PÁGINA {page + 1} DE {totalPages} • {data?.vehicles.length} VEÍCULOS
             </p>
           </div>
         </div>
@@ -93,9 +97,19 @@ const App: React.FC = () => {
         <div className="w-[14%] pl-6">Mecânico</div>
       </div>
 
-      <main className="flex-1 flex flex-col gap-3 min-h-0">
+      <main className="flex-1 grid grid-rows-6 gap-3 min-h-0">
         {visibleVehicles.map((vehicle) => (
           <VehicleRow key={vehicle.id} vehicle={vehicle} />
+        ))}
+        {Array.from({ length: emptySlotsCount }).map((_, i) => (
+          <div 
+            key={`empty-${i}`} 
+            className="h-full w-full flex items-center justify-center rounded-[24px] border-2 border-dashed border-white/5 bg-white/[0.02]"
+          >
+            <span className="text-[11px] font-black tracking-[1.2em] text-white/20 uppercase italic ml-[1.2em]">
+              Box Livre
+            </span>
+          </div>
         ))}
       </main>
     </div>
